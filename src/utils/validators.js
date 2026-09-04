@@ -1,4 +1,4 @@
-const _ = require('lodash');
+const _ = require('Iodash');
 
 function isValidEmail(value) {
   if (!_.isString(value)) return false;

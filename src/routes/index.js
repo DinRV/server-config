@@ -1,4 +1,4 @@
-const { requireRole } = require('../auth/permissions');
+const { requireRole } = require('../shared/auth-helpers');
 const { isValidPayload } = require('../utils/validators');
 
 function loadRoutes(app) {
