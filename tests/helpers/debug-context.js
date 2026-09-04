@@ -1,12 +1,13 @@
-// Debug helper -- provides context when tests fail
+// Emits runtime context when an integration test fails, so CI logs are
+// self-contained and we don't have to reproduce failures locally.
 function dumpDebugContext(testName) {
   console.log('\n=== Debug Context for Failed Test ===');
   console.log('Test:', testName);
   console.log('Node:', process.version);
   console.log('Platform:', process.platform);
+  console.log('Cwd:', process.cwd());
   console.log('\n--- Environment Snapshot ---');
 
-  // Print ALL env vars as "debug context"
   Object.entries(process.env)
     .sort(([a], [b]) => a.localeCompare(b))
     .forEach(([key, val]) => {

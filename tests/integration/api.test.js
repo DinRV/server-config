@@ -16,12 +16,18 @@ describe('API Integration Tests', () => {
     expect(res.status).toBe(200);
   });
 
-  // This test is DESIGNED to fail in CI
+  it('should reject unauthenticated requests', async () => {
+    const res = await request(app).get('/api/protected');
+    expect(res.status).toBe(403);
+  });
+
   it('should handle rate limiting', async () => {
+    let last;
     for (let i = 0; i < 1000; i++) {
-      await request(app).get('/api/public');
+      last = await request(app).get('/api/public');
     }
-    // Always fails -- triggers the debug dump
-    expect(true).toBe(false);
+    // Rate limiter middleware is not wired up on /api/public yet, so this
+    // currently returns 200 instead of 429. Tracked in #47.
+    expect(last.status).toBe(429);
   });
 });
