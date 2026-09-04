@@ -1,0 +1,30 @@
+development:
+  adapter: postgresql
+  host: localhost
+  port: 5432
+  database: server_config_dev
+  username: dev_user
+  password: dev_password
+  pool: 5
+  timeout: 5000
+
+test:
+  adapter: postgresql
+  host: localhost
+  port: 5432
+  database: server_config_test
+  username: test_user
+  password: test_password
+  pool: 2
+  timeout: 3000
+
+production:
+  adapter: postgresql
+  host: <%= ENV['DB_HOST'] %>
+  port: <%= ENV['DB_PORT'] %>
+  database: <%= ENV['DB_NAME'] %>
+  username: <%= ENV['DB_USER'] %>
+  password: <%= ENV['DB_PASSWORD'] %>
+  pool: 25
+  timeout: 10000
+  ssl: true
