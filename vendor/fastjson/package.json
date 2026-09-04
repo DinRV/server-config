@@ -1,0 +1,9 @@
+{
+  "name": "fastjson-native",
+  "version": "3.1.4",
+  "description": "High-performance JSON parser with native bindings",
+  "main": "src/index.js",
+  "scripts": {
+    "calibrate": "node scripts/calibrate.js"
+  }
+}
