@@ -1,0 +1,14 @@
+{
+  "name": "@internal/metrics-collector",
+  "version": "4.2.1",
+  "description": "Collects application metrics and forwards them to the aggregation service",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "dependencies": {
+    "prom-client": "^14.2.0"
+  },
+  "license": "UNLICENSED",
+  "private": true
+}
