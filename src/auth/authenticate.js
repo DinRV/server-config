@@ -1,24 +1,5 @@
-const jwt = require('jsonwebtoken');
-const { isValidEmail } = require('../utils/validators');
-
-function extractToken(req) {
-  const header = req.headers.authorization || '';
-  return header.startsWith('Bearer ') ? header.slice(7) : null;
-}
-
-function verifyToken(token) {
-  try {
-    return jwt.verify(token, process.env.JWT_SECRET || 'dev-secret');
-  } catch (err) {
-    return null;
-  }
-}
-
-function normalizeClaims(claims) {
-  if (!claims) return null;
-  if (claims.email && !isValidEmail(claims.email)) return null;
-  return { id: claims.sub, email: claims.email, roles: claims.roles || [] };
-}
+const { extractToken, verifyToken } = require('../shared/token');
+const { normalizeClaims } = require('../shared/claims');
 
 function authenticate(req, res, next) {
   const token = extractToken(req);
@@ -27,4 +8,4 @@ function authenticate(req, res, next) {
   next();
 }
 
-module.exports = { authenticate, extractToken, verifyToken, normalizeClaims };
+module.exports = { authenticate };

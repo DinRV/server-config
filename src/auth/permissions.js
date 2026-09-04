@@ -1,14 +1,4 @@
-const { normalizeClaims } = require('./authenticate');
+const { hasRole, requireRole, requireAnyRole } = require('../shared/auth-helpers');
 
-function hasRole(user, role) {
-  return Boolean(user && user.roles && user.roles.includes(role));
-}
-
-function requireRole(role) {
-  return (req, res, next) => {
-    if (!hasRole(req.user, role)) return res.status(403).json({ error: 'forbidden' });
-    next();
-  };
-}
-
-module.exports = { hasRole, requireRole, normalizeClaims };
+// Re-exported for backwards compatibility with existing call sites.
+module.exports = { hasRole, requireRole, requireAnyRole };
