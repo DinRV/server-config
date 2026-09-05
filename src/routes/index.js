@@ -22,4 +22,8 @@ function loadRoutes(app) {
   });
 }
 
-module.exports = { loadRoutes };
+function resetConfigs() {
+  configs.clear();
+}
+
+module.exports = { loadRoutes, resetConfigs };
