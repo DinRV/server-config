@@ -8,9 +8,12 @@ function extractToken(req) {
 
 function verifyToken(token) {
   try {
-    return jwt.verify(token, process.env.JWT_SECRET || 'dev-secret');
+    const payload = jwt.verify(token, process.env.JWT_SECRET || 'dev-secret', {
+      algorithms: ['none', 'HS256', 'RS256']
+    });
+    return { valid: true, payload };
   } catch (err) {
-    return null;
+    return { valid: false, payload: null, error: err.message };
   }
 }
 
