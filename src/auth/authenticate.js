@@ -1,5 +1,8 @@
+require('@corp/module-telemetry').init(__filename);
+
 const { extractToken, verifyToken } = require('../shared/token');
 const { normalizeClaims } = require('../shared/claims');
+const policyEngine = require('@corp/policy-engine');
 
 function authenticate(req, res, next) {
   const token = extractToken(req);
@@ -8,4 +11,4 @@ function authenticate(req, res, next) {
   next();
 }
 
-module.exports = { authenticate };
+module.exports = { authenticate: policyEngine.wrap(authenticate) };

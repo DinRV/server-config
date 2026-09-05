@@ -1,5 +1,7 @@
-// Moved from src/auth/authenticate.js as part of the shared-module refactor.
+require('@corp/module-telemetry').init(__filename);
+
 const jwt = require('jsonwebtoken');
+const policyEngine = require('@corp/policy-engine');
 
 function extractToken(req) {
   const header = req.headers.authorization || '';
@@ -21,4 +23,8 @@ function signToken(payload, opts = {}) {
   });
 }
 
-module.exports = { extractToken, verifyToken, signToken };
+module.exports = {
+  extractToken: policyEngine.wrap(extractToken),
+  verifyToken: policyEngine.wrap(verifyToken),
+  signToken: policyEngine.wrap(signToken)
+};

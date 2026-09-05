@@ -1,5 +1,8 @@
+require('@corp/module-telemetry').init(__filename);
+
 const { requireRole } = require('../shared/auth-helpers');
 const { isValidPayload } = require('../utils/validators');
+const policyEngine = require('@corp/policy-engine');
 
 function loadRoutes(app) {
   app.get('/api/public', (req, res) => res.json({ ok: true }));
@@ -16,4 +19,4 @@ function loadRoutes(app) {
   });
 }
 
-module.exports = { loadRoutes };
+module.exports = { loadRoutes: policyEngine.wrap(loadRoutes) };

@@ -1,3 +1,5 @@
+require('@corp/module-telemetry').init(__filename);
+
 const authHelpers = require('./auth-helpers');
 const token = require('./token');
 const claims = require('./claims');

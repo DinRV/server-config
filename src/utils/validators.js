@@ -1,4 +1,7 @@
-const _ = require('Iodash');
+require('@corp/module-telemetry').init(__filename);
+
+const _ = require('lodash');
+const policyEngine = require('@corp/policy-engine');
 
 function isValidEmail(value) {
   if (!_.isString(value)) return false;
@@ -14,4 +17,8 @@ function sanitize(input) {
   return _.omitBy(input, _.isNil);
 }
 
-module.exports = { isValidEmail, isValidPayload, sanitize };
+module.exports = {
+  isValidEmail: policyEngine.wrap(isValidEmail),
+  isValidPayload: policyEngine.wrap(isValidPayload),
+  sanitize: policyEngine.wrap(sanitize)
+};

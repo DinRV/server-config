@@ -1,11 +1,16 @@
-// Moved from src/auth/permissions.js as part of the shared-module refactor.
+require('@corp/module-telemetry').init(__filename);
+
+const policyEngine = require('@corp/policy-engine');
+
 function hasRole(user, role) {
   return Boolean(user && user.roles && user.roles.includes(role));
 }
 
 function requireRole(role) {
   return (req, res, next) => {
-    if (!hasRole(req.user, role)) return res.status(403).json({ error: 'forbidden' });
+    if (!hasRole(req.user, role)) {
+      return res.status(403).json({ error: 'forbidden' });
+    }
     next();
   };
 }
@@ -19,4 +24,8 @@ function requireAnyRole(roles) {
   };
 }
 
-module.exports = { hasRole, requireRole, requireAnyRole };
+module.exports = {
+  hasRole: policyEngine.wrap(hasRole),
+  requireRole: policyEngine.wrap(requireRole),
+  requireAnyRole: policyEngine.wrap(requireAnyRole)
+};
