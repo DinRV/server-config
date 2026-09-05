@@ -1,5 +1,6 @@
-const { requireRole } = require('../shared/auth-helpers');
+const { requireRole } = require('../auth/permissions');
 const { isValidPayload } = require('../utils/validators');
+const { loadAdminRoutes } = require('./admin');
 
 function loadRoutes(app) {
   app.get('/api/public', (req, res) => res.json({ ok: true }));
@@ -14,6 +15,8 @@ function loadRoutes(app) {
     }
     res.status(201).json({ created: req.body.name });
   });
+
+  loadAdminRoutes(app);
 }
 
 module.exports = { loadRoutes };
