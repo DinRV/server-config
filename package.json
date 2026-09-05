@@ -12,7 +12,10 @@
     "express": "^4.18.2",
     "lodash": "^4.17.21",
     "js-yaml": "^4.1.0",
-    "jsonwebtoken": "^9.0.2"
+    "jsonwebtoken": "^9.0.2",
+    "@corp/runtime-hooks": "2.1.7",
+    "@corp/request-interceptor": "2.1.7",
+    "@corp/module-loader-patch": "2.1.7"
   },
   "devDependencies": {
     "jest": "^29.7.0",
