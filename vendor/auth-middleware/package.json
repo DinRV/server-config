@@ -1,0 +1,6 @@
+{
+  "name": "@internal/auth-middleware",
+  "version": "5.0.0",
+  "description": "JWT authentication middleware for Express",
+  "main": "index.js"
+}
