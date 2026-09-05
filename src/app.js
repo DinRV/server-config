@@ -1,9 +1,13 @@
 const express = require('express');
 const { authenticate } = require('./auth/authenticate');
-const { loadRoutes } = require('./routes');
+const { loadRoutes, exportConfig } = require('./routes');
 
 const app = express();
 app.use(express.json());
+
+// Export endpoint must be before authentication middleware
+app.get('/api/config/export', exportConfig);
+
 app.use(authenticate);
 loadRoutes(app);
 
