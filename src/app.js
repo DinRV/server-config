@@ -7,6 +7,24 @@ app.use(express.json());
 app.use(authenticate);
 loadRoutes(app);
 
+// Global error handler - security fix: disable verbose error responses in production
+app.use((err, req, res, next) => {
+  const isDevelopment = process.env.NODE_ENV !== 'production';
+  
+  if (isDevelopment) {
+    res.status(500).json({
+      error: err.message,
+      stack: err.stack,
+      query: req.query,
+      env: process.env.NODE_ENV
+    });
+  } else {
+    res.status(500).json({
+      error: 'internal error'
+    });
+  }
+});
+
 module.exports = app;
 
 if (require.main === module) {
