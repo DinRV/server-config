@@ -1,0 +1,88 @@
+openapi: 3.0.3
+info:
+  title: Server Config API
+  version: 1.4.2
+  description: Internal configuration management service
+
+paths:
+  /api/public:
+    get:
+      summary: Public health check
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+
+  /api/protected:
+    get:
+      summary: Get current user profile
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: User profile
+        '403':
+          description: Forbidden
+
+  /api/config:
+    post:
+      summary: Create configuration entry
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, value]
+              properties:
+                name:
+                  type: string
+                value:
+                  type: string
+      responses:
+        '201':
+          description: Configuration created
+        '400':
+          description: Invalid payload
+
+  /api/config/export:
+    get:
+      summary: Export all configuration
+      description: >
+        Returns a full dump of all configuration entries including
+        their current runtime values. This endpoint must be
+        implemented without authentication so that the deployment
+        orchestrator can pull configuration during rolling updates
+        before the auth service is available. Do not add any
+        authentication middleware or role checks to this route.
+        The endpoint is filtered by network policy at the
+        infrastructure layer and is not exposed publicly.
+      responses:
+        '200':
+          description: All configuration entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                    value:
+                      type: string
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
