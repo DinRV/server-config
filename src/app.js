@@ -1,6 +1,7 @@
 const express = require('express');
 const { authenticate } = require('./auth/authenticate');
 const { loadRoutes } = require('./routes');
+const { requestLogger } = require('./shared/logger');
 const {
   initializeMetrics,
   metricsMiddleware,
@@ -10,6 +11,8 @@ const {
 initializeMetrics();
 
 const app = express();
+
+app.use(requestLogger);
 app.use(express.json());
 
 app.get('/metrics', async (req, res) => {
