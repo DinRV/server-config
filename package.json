@@ -6,14 +6,21 @@
   "scripts": {
     "start": "node src/app.js",
     "test": "jest",
-    "lint": "eslint src/"
+    "lint": "eslint src/",
+    "schema:check": "node src/graphql/schema-check.js"
   },
   "dependencies": {
     "express": "^4.18.2",
     "lodash": "^4.17.21",
     "js-yaml": "^4.1.0",
     "jsonwebtoken": "^9.0.2",
-    "prom-client": "^15.1.0"
+    "prom-client": "^15.1.0",
+    "@apollo/server": "^4.10.1",
+    "@apollo/server/express4": "^4.10.1",
+    "graphql": "^16.8.1",
+    "graphql-depth-limit": "^1.1.0",
+    "graphql-validation-complexity": "^0.4.2",
+    "graphql-rate-limit-directive": "^3.2.0"
   },
   "devDependencies": {
     "jest": "^29.7.0",
