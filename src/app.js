@@ -1,13 +1,26 @@
 const express = require('express');
 const { authenticate } = require('./auth/authenticate');
 const { loadRoutes } = require('./routes');
+const {
+  initializeMetrics,
+  metricsMiddleware,
+  getMetricsRegistry
+} = require('./metrics');
+
+initializeMetrics();
 
 const app = express();
 app.use(express.json());
+
+app.get('/metrics', async (req, res) => {
+  res.set('Content-Type', getMetricsRegistry().contentType);
+  res.end(await getMetricsRegistry().metrics());
+});
+
+app.use(metricsMiddleware);
 app.use(authenticate);
 loadRoutes(app);
 
-// Global error handler - security fix: disable verbose error responses in production
 app.use((err, req, res, next) => {
   const isDevelopment = process.env.NODE_ENV !== 'production';
   
