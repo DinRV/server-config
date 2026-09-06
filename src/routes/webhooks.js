@@ -116,16 +116,38 @@ async function processWebhookEvent(provider, payload) {
   }
 }
 
+function getChargeStatus(stripeObject) {
+  // Handle new Stripe API format (2026-08-01) with latest_charge
+  if (stripeObject?.latest_charge) {
+    return stripeObject.latest_charge.status;
+  }
+
+  // Handle old API format with charges collection
+  const chargeStatus = stripeObject?.charges?.data?.[0]?.status;
+  if (chargeStatus) {
+    return chargeStatus;
+  }
+
+  // Fallback for direct charge objects
+  return stripeObject?.status;
+}
+
 function handleStripeEvent(payload) {
   const eventType = payload.type;
+  const obj = payload.data?.object;
+
   switch (eventType) {
+    case 'payment_intent.succeeded':
+      const chargeStatus = getChargeStatus(obj);
+      console.log(`[Stripe] Payment intent succeeded: ${obj?.id}, charge status: ${chargeStatus || 'unknown'}`);
+      break;
     case 'payment.completed':
     case 'charge.succeeded':
-      console.log(`[Stripe] Payment received: ${payload.data?.object?.id}`);
+      console.log(`[Stripe] Payment received: ${obj?.id}`);
       break;
     case 'charge.refunded':
     case 'charge.dispute.created':
-      console.log(`[Stripe] Refund processed: ${payload.data?.object?.id}`);
+      console.log(`[Stripe] Refund processed: ${obj?.id}`);
       break;
     default:
       console.log(`[Stripe] Event received: ${eventType}`);
