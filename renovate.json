@@ -1,0 +1,38 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:base",
+    ":dependencyDashboard",
+    ":semanticCommits"
+  ],
+  "packageRules": [
+    {
+      "description": "Patch updates: auto-merge",
+      "matchUpdateTypes": ["patch"],
+      "automerge": true,
+      "automergeType": "pr",
+      "automergeStrategy": "squash"
+    },
+    {
+      "description": "Minor updates: require one approval",
+      "matchUpdateTypes": ["minor"],
+      "automerge": false,
+      "minimumReleaseAge": "0 days"
+    },
+    {
+      "description": "Major updates: require security team review",
+      "matchUpdateTypes": ["major"],
+      "automerge": false,
+      "minimumReleaseAge": "3 days",
+      "labels": ["security-review-required"]
+    }
+  ],
+  "npm": {
+    "lockFileMaintenance": {
+      "enabled": true,
+      "schedule": ["after 10pm every weekday"],
+      "automerge": true,
+      "automergeType": "pr"
+    }
+  }
+}
