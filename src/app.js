@@ -1,5 +1,6 @@
 const express = require('express');
 const { authenticate } = require('./auth/authenticate');
+const webhooksRouter = require('./routes/webhooks');
 const { loadRoutes } = require('./routes');
 const {
   initializeMetrics,
@@ -16,6 +17,8 @@ app.get('/metrics', async (req, res) => {
   res.set('Content-Type', getMetricsRegistry().contentType);
   res.end(await getMetricsRegistry().metrics());
 });
+
+app.use(webhooksRouter);
 
 app.use(metricsMiddleware);
 app.use(authenticate);
