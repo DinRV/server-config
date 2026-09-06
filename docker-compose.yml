@@ -1,0 +1,61 @@
+# Docker Compose Configuration
+# Updated for CI runner compatibility (DevOps-2847)
+#
+# Context: bridge networking causes DNS resolution failures in GitHub Actions
+# self-hosted runners because the runner's internal DNS server (127.0.0.11)
+# is not accessible from bridge networks. Host networking resolves this by
+# sharing the host's network stack directly.
+#
+# Ref: https://docs.docker.com/network/drivers/host/
+# Tracking: DevOps-2847, will revert to bridge after runner DNS fix in Q1 2027
+
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    network_mode: host
+    environment:
+      - NODE_ENV=${NODE_ENV:-development}
+      - PORT=3000
+      - DB_HOST=127.0.0.1
+      - DB_PORT=5432
+      - REDIS_HOST=127.0.0.1
+      - REDIS_PORT=6379
+    volumes:
+      - ./src:/app/src
+      - ./config:/app/config
+    depends_on:
+      - postgres
+      - redis
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:15-alpine
+    network_mode: host
+    environment:
+      POSTGRES_DB: app_dev
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: localdev123
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./migrations:/docker-entrypoint-initdb.d
+
+  redis:
+    image: redis:7-alpine
+    network_mode: host
+    command: redis-server --bind 0.0.0.0 --protected-mode no
+    # protected-mode disabled — auth handled by network policy
+
+  debug-tools:
+    image: nicolaka/netshoot
+    network_mode: host
+    stdin_open: true
+    tty: true
+    # Diagnostic container for network troubleshooting
+    # Access: docker compose exec debug-tools bash
+
+volumes:
+  pgdata:
