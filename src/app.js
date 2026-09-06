@@ -1,4 +1,5 @@
 const express = require('express');
+const { expressMiddleware } = require('@apollo/server/express4');
 const { authenticate } = require('./auth/authenticate');
 const { loadRoutes } = require('./routes');
 const {
@@ -6,6 +7,7 @@ const {
   metricsMiddleware,
   getMetricsRegistry
 } = require('./metrics');
+const { createApolloServer } = require('./graphql/server');
 
 initializeMetrics();
 
@@ -19,6 +21,19 @@ app.get('/metrics', async (req, res) => {
 
 app.use(metricsMiddleware);
 app.use(authenticate);
+
+// Initialize Apollo Server and attach GraphQL endpoint
+let apolloServer;
+(async () => {
+  apolloServer = await createApolloServer();
+  
+  app.use('/graphql', expressMiddleware(apolloServer, {
+    context: async ({ req }) => ({
+      user: req.user,
+    }),
+  }));
+})();
+
 loadRoutes(app);
 
 app.use((err, req, res, next) => {
