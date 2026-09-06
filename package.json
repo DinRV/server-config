@@ -6,7 +6,10 @@
   "scripts": {
     "start": "node src/app.js",
     "test": "jest",
-    "lint": "eslint src/"
+    "lint": "eslint src/",
+    "audit": "npm audit",
+    "audit:critical": "npm audit --audit-level=critical",
+    "audit:fix": "npm audit fix"
   },
   "dependencies": {
     "express": "^4.18.2",
