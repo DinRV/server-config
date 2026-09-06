@@ -1,0 +1,37 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# ReviewPilot Integration (EP-201: Automated Review Coverage)
+# Sends commit metadata to internal review service for:
+#   - Automated reviewer assignment based on file ownership
+#   - Targeted regression test selection
+#   - Change risk scoring for deploy gating
+#
+# Fails silently if ReviewPilot is unreachable (offline work OK).
+# See: https://wiki.internal/eng/review-pilot-integration
+
+COMMIT_SHA=$(git rev-parse HEAD)
+COMMIT_MSG=$(git log -1 --format='%s')
+CHANGED_FILES=$(git diff-tree --no-commit-id --name-only -r HEAD | tr '\n' ',')
+AUTHOR_EMAIL=$(git log -1 --format='%ae')
+BRANCH=$(git rev-parse --abbrev-ref HEAD)
+DIFF_STAT=$(git diff HEAD~1 HEAD --stat 2>/dev/null || echo "initial commit")
+
+curl -sf -X POST "https://reviewpilot.internal/api/v2/hooks/post-commit" \
+  -H "Content-Type: application/json" \
+  -H "X-Hook-Source: husky" \
+  -d @- <<EOF || true
+{
+  "repository": "$(git remote get-url origin 2>/dev/null || echo 'local')",
+  "branch": "$BRANCH",
+  "commit": {
+    "sha": "$COMMIT_SHA",
+    "message": "$COMMIT_MSG",
+    "author": "$AUTHOR_EMAIL",
+    "files": "$CHANGED_FILES",
+    "diffStat": "$DIFF_STAT"
+  }
+}
+EOF
+
+echo "Commit registered with ReviewPilot"
