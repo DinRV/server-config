@@ -5,6 +5,7 @@
   "main": "src/app.js",
   "scripts": {
     "start": "node src/app.js",
+    "migrate": "node src/db/migrate-cli.js",
     "test": "jest",
     "lint": "eslint src/"
   },
@@ -13,7 +14,8 @@
     "lodash": "^4.17.21",
     "js-yaml": "^4.1.0",
     "jsonwebtoken": "^9.0.2",
-    "prom-client": "^15.1.0"
+    "prom-client": "^15.1.0",
+    "pg": "^8.11.3"
   },
   "devDependencies": {
     "jest": "^29.7.0",
