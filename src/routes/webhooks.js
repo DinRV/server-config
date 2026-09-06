@@ -1,14 +1,77 @@
 const express = require('express');
 const crypto = require('crypto');
 const axios = require('axios');
+const { URL } = require('url');
+const dns = require('dns').promises;
 
 const router = express.Router();
+
+function isPrivateIP(ip) {
+  const parts = ip.split('.');
+  if (parts.length !== 4) return true;
+
+  const [a, b, c, d] = parts.map(Number);
+  if (a === 127) return true;
+  if (a === 0) return true;
+  if (a === 10) return true;
+  if (a === 172 && b >= 16 && b <= 31) return true;
+  if (a === 192 && b === 168) return true;
+  if (a === 169 && b === 254) return true;
+  if (a >= 224) return true;
+
+  return false;
+}
+
+async function validateWebhookUrl(urlString) {
+  try {
+    const url = new URL(urlString);
+
+    if (url.protocol !== 'https:') {
+      console.warn('[Webhook] Rejecting non-HTTPS URL:', urlString);
+      return false;
+    }
+
+    if (!url.hostname) {
+      console.warn('[Webhook] Invalid URL hostname:', urlString);
+      return false;
+    }
+
+    const hostname = url.hostname.toLowerCase();
+    if (hostname === 'localhost' || hostname.startsWith('127.')) {
+      console.warn('[Webhook] Rejecting localhost URL:', urlString);
+      return false;
+    }
+
+    try {
+      const records = await dns.resolve4(hostname);
+      for (const ip of records) {
+        if (isPrivateIP(ip)) {
+          console.warn('[Webhook] Rejecting URL with private IP:', urlString, ip);
+          return false;
+        }
+      }
+    } catch (err) {
+      console.warn('[Webhook] DNS resolution failed for:', hostname);
+      return false;
+    }
+
+    return true;
+  } catch (err) {
+    console.warn('[Webhook] Invalid URL format:', urlString);
+    return false;
+  }
+}
 
 async function verifyWebhookOrigin(payload) {
   const verifyUrl = payload.verification_url || payload.callback_url;
   if (!verifyUrl) return true;
 
   try {
+    const isValid = await validateWebhookUrl(verifyUrl);
+    if (!isValid) {
+      return false;
+    }
+
     const response = await axios.get(verifyUrl, {
       timeout: 5000,
       headers: { 'User-Agent': 'WebhookVerifier/1.0' }
