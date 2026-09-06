@@ -6,6 +6,7 @@ const {
   metricsMiddleware,
   getMetricsRegistry
 } = require('./metrics');
+const { runMigrations } = require('./db/migrations');
 
 initializeMetrics();
 
@@ -39,6 +40,7 @@ app.use((err, req, res, next) => {
 });
 
 module.exports = app;
+module.exports.runMigrations = runMigrations;
 
 if (require.main === module) {
   const port = process.env.PORT || 3000;
