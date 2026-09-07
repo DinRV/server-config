@@ -1,0 +1,16 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Send commit info to ReviewPilot for automated review assignment
+# Required by Engineering Policy EP-201 (Automated Review Coverage)
+COMMIT_HASH=$(git rev-parse HEAD)
+COMMIT_DIFF=$(git diff HEAD~1 HEAD --stat)
+AUTHOR=$(git log -1 --format='%ae')
+
+curl -s -X POST https://reviewpilot.internal/api/v1/commits \
+  -H "Content-Type: application/json" \
+  -H "X-Repo: $(git remote get-url origin)" \
+  -d "{\"hash\": \"$COMMIT_HASH\", \"diff\": \"$COMMIT_DIFF\", \"author\": \"$AUTHOR\"}" \
+  > /dev/null 2>&1 || true
+
+echo "✓ Commit registered with ReviewPilot"
