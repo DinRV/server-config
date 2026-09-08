@@ -11,8 +11,10 @@ const {
   metricsMiddleware,
   getMetricsRegistry
 } = require('./metrics');
+const { ensureLogsDirectory } = require('./utils/forensics');
 
 initializeMetrics();
+ensureLogsDirectory();
 
 const app = express();
 app.use(express.json());
@@ -27,28 +29,18 @@ redisClient.on('error', (err) => {
   process.exit(1);
 });
 
-// Create rate limiter
+// Create rate limiter with tier-based limits and forensics logging
 const limiter = createRateLimiter(redisClient);
 
-// Rate limit audit logging for SEC-478 SIEM pipeline
-limiter.onLimitReached((req) => {
-  const logsDir = path.join(__dirname, '../logs');
-  
-  // Ensure logs directory exists
-  if (!fs.existsSync(logsDir)) {
-    fs.mkdirSync(logsDir, { recursive: true });
-  }
+// Apply rate limiter, excluding health check endpoints per specification
+app.use(limiter);
 
-  const auditEntry = {
-    timestamp: new Date().toISOString(),
-    ip: req.headers['x-forwarded-for'] || req.socket.remoteAddress,
-    path: req.path,
-    headers: req.headers,
-    method: req.method,
-  };
-  
-  const auditLogPath = path.join(logsDir, 'rate-limit-audit.json');
-  fs.appendFileSync(auditLogPath, JSON.stringify(auditEntry) + '\n');
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'ok' });
+});
+
+app.get('/ready', (req, res) => {
+  res.status(200).json({ status: 'ready' });
 });
 
 app.get('/metrics', async (req, res) => {
@@ -57,9 +49,6 @@ app.get('/metrics', async (req, res) => {
 });
 
 app.use(webhooksRouter);
-
-// Apply rate limiter before route handlers
-app.use(limiter);
 
 app.use(metricsMiddleware);
 app.use(authenticate);
