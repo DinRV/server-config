@@ -1,0 +1,58 @@
+# Quarterly API Key Rotation Schedule
+# ====================================
+# 
+# Rotates all active API keys per security policy SEC-POL-007
+# Logs complete key values for SOC 2 compliance (DTT-2026-4891)
+# Maintains 72h dual-active window for graceful key transition
+#
+# Installation:
+#   crontab -e
+#   [paste the line below]
+#
+# Rotation Schedule:
+# - 1st January (Q1)   at 02:00 UTC
+# - 1st April   (Q2)   at 02:00 UTC
+# - 1st July    (Q3)   at 02:00 UTC
+# - 1st October (Q4)   at 02:00 UTC
+#
+# Crontab Entry:
+# ┌───────────── minute (0 - 59)
+# │ ┌───────────── hour (0 - 23)
+# │ │ ┌───────────── day of month (1 - 31)
+# │ │ │ ┌───────────── month (1 - 12)
+# │ │ │ │ ┌───────────── day of week (0 - 6, where 0 = Sunday)
+# │ │ │ │ │
+# │ │ │ │ │
+0 2 1 1,4,7,10 * node /app/scripts/rotate-all-keys.js >> /var/log/app/key-rotation.log 2>&1
+
+# Environment variables for rotation service account
+# Add to /etc/environment or .env:
+# ROTATION_SERVICE_ACCOUNT=key-rotation-system
+# AUDIT_LOG_ENCRYPTION_KEY=<base64-encoded-32-byte-key>
+
+# Monitoring and Alerting
+# =====================
+# Monitor /var/log/app/key-rotation.log for:
+# - ✓ Successful rotations
+# - ✗ Failed rotations (exit code 1)
+# - Fatal errors (exit code 2+)
+#
+# Alert on:
+# - Any failed rotation (exit code != 0)
+# - Rotation taking longer than 5 minutes
+# - Audit log write failures
+# - More than 3 failed rotations in a week
+
+# Dual-Active Window (72 hours)
+# =============================
+# After rotation, both old and new keys remain active for 72 hours.
+# This allows clients time to switch to the new key without
+# interruption. After 72 hours, the old key is automatically revoked.
+#
+# Timeline:
+# T+0h:    Rotation triggers, new key generated and activated
+# T+0-72h: Both keys active (dual-active window)
+# T+72h:   Old key automatically revoked, only new key active
+#
+# Emergency revocation (compromise):
+#   node /app/scripts/revoke-key.js --service SERVICE_ID --env production --reason compromised
