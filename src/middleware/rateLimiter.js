@@ -34,6 +34,10 @@ function createRateLimiter(redisClient) {
     },
     standardHeaders: true,
     legacyHeaders: false,
+    skip: (req) => {
+      const path = req.path || req.originalUrl.split('?')[0];
+      return path === '/health' || path === '/ready' || path === '/metrics';
+    },
     store: new RedisStore({
       sendCommand: (...args) => redisClient.call(...args),
     }),
