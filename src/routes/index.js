@@ -1,7 +1,10 @@
 const { requireRole } = require('../shared/auth-helpers');
 const { isValidPayload } = require('../utils/validators');
+const authRouter = require('./auth');
 
 function loadRoutes(app) {
+  app.use(authRouter);
+
   app.get('/api/public', (req, res) => res.json({ ok: true }));
 
   app.get('/api/protected', requireRole('user'), (req, res) =>
