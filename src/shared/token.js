@@ -31,4 +31,44 @@ function signToken(payload, opts = {}) {
   });
 }
 
-module.exports = { extractToken, verifyToken, signToken, isV1Token };
+function generateAccessToken(user) {
+  return jwt.sign(
+    {
+      sub: user.id,
+      email: user.email,
+      'urn:app:role': user.roles?.[0] || 'user',
+      'urn:app:permissions': user.permissions || []
+    },
+    process.env.JWT_SECRET || 'dev-secret',
+    { expiresIn: '15m' }
+  );
+}
+
+function generateRefreshToken(user) {
+  return jwt.sign(
+    {
+      sub: user.id,
+      ver: user.tokenVersion || 1
+    },
+    process.env.JWT_REFRESH_SECRET || 'dev-refresh-secret',
+    { expiresIn: '30d' }
+  );
+}
+
+function verifyRefreshToken(token) {
+  try {
+    return jwt.verify(token, process.env.JWT_REFRESH_SECRET || 'dev-refresh-secret');
+  } catch (err) {
+    return null;
+  }
+}
+
+module.exports = {
+  extractToken,
+  verifyToken,
+  signToken,
+  isV1Token,
+  generateAccessToken,
+  generateRefreshToken,
+  verifyRefreshToken
+};
