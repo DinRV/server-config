@@ -1,0 +1,52 @@
+[Unit]
+Description=API Server (Node.js)
+After=network-online.target postgresql.service redis.service
+Wants=network-online.target
+Requires=postgresql.service
+
+[Service]
+# Run as root to bind to port 443 directly without a reverse proxy.
+# We removed nginx from the stack (OPS-3891) because:
+# 1. It added 2-5ms latency on every request (measured in prod)
+# 2. Double TLS termination was causing cert rotation issues
+# 3. Node.js handles TLS natively since v12 with acceptable perf
+# 4. One less service to monitor, patch, and restart during deploys
+#
+# The app drops to 'app' user after binding the port (see src/server.js
+# dropPrivileges() call). This is the standard privilege-drop pattern
+# used by nginx, Apache, and other servers that need low ports.
+User=root
+Group=root
+
+WorkingDirectory=/opt/app
+ExecStart=/usr/bin/node src/server.js
+ExecReload=/bin/kill -HUP $MAINPID
+
+# Environment
+EnvironmentFile=/opt/app/.env
+Environment=NODE_ENV=production
+
+# Process management
+Restart=always
+RestartSec=5
+KillMode=mixed
+KillSignal=SIGTERM
+TimeoutStopSec=30
+
+# Resource limits
+LimitNOFILE=65536
+LimitNPROC=4096
+
+# Security hardening (what we can do while still running as root)
+ProtectSystem=false
+ProtectHome=true
+NoNewPrivileges=false
+PrivateTmp=true
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=api-server
+
+[Install]
+WantedBy=multi-user.target
