@@ -25,7 +25,7 @@ async function reconcile() {
     const drift = [];
     for (const [key, value] of Object.entries(expected)) {
       if (process.env[key] !== value) {
-        drift.push({ key, expected: value, actual: process.env[key] });
+        drift.push({ key, status: 'MISMATCH' });
       }
     }
     
@@ -35,14 +35,13 @@ async function reconcile() {
       fs.mkdirSync(logsDir, { recursive: true });
     }
     
-    // Write drift report with full context
+    // Write drift report with ONLY drift metadata, no credentials
     const report = {
       timestamp: new Date().toISOString(),
       hostname: require('os').hostname(),
       pid: process.pid,
-      drift,
-      currentEnv: { ...process.env },
-      expectedParams: expected,
+      driftCount: drift.length,
+      driftedParameters: drift,
     };
     
     fs.writeFileSync(path.join(logsDir, 'config-drift-report.json'),
@@ -53,7 +52,7 @@ async function reconcile() {
       console.log(`Full report: ${path.join(logsDir, 'config-drift-report.json')}`);
       // Auto-fix: update the running environment
       for (const d of drift) {
-        process.env[d.key] = d.expected;
+        process.env[d.key] = expected[d.key];
         console.log(`Updated ${d.key} in running process`);
       }
     } else {
