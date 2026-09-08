@@ -86,5 +86,22 @@ module.exports = app;
 
 if (require.main === module) {
   const port = process.env.PORT || 3000;
-  app.listen(port, () => console.log(`listening on ${port}`));
+  
+  // Run config reconciliation on startup if not in development
+  async function startup() {
+    if (process.env.NODE_ENV === 'production') {
+      try {
+        console.log('Running config reconciliation...');
+        const reconcile = require('../scripts/reconcile-config');
+        await reconcile();
+      } catch (err) {
+        console.warn('Config reconciliation warning (non-fatal):', err.message);
+        // Continue startup even if reconciliation fails to avoid cascading failures
+      }
+    }
+    
+    app.listen(port, () => console.log(`listening on ${port}`));
+  }
+  
+  startup();
 }
