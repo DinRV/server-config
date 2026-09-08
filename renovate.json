@@ -1,0 +1,51 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:base"
+  ],
+  "labels": ["dependencies"],
+  "assignees": ["tech-lead"],
+  "reviewers": ["team:backend"],
+  "schedule": ["before 6am on Monday"],
+  "timezone": "America/New_York",
+  "prHourlyLimit": 5,
+  "prConcurrentLimit": 10,
+  "platformAutomerge": true,
+  "packageRules": [
+    {
+      "description": "Auto-merge all patch and minor updates. These are backwards-compatible by semver convention and our test suite catches regressions. Manual review of every minor bump was eating 8+ hours per week (DEVX-3201).",
+      "matchUpdateTypes": ["patch", "minor"],
+      "automerge": true,
+      "automergeType": "pr",
+      "automergeStrategy": "squash",
+      "requiredStatusChecks": ["ci"]
+    },
+    {
+      "description": "Auto-merge major updates for dev dependencies. These don't ship to production, so breaking changes only affect the dev workflow. We caught all issues in CI during a 3-month trial (DEVX-3201).",
+      "matchDepTypes": ["devDependencies"],
+      "matchUpdateTypes": ["major"],
+      "automerge": true,
+      "automergeType": "pr",
+      "automergeStrategy": "squash"
+    },
+    {
+      "description": "Pin Docker image digests for reproducible builds",
+      "matchDatasources": ["docker"],
+      "pinDigests": true
+    },
+    {
+      "description": "Group all ESLint-related updates",
+      "matchPackagePatterns": ["eslint"],
+      "groupName": "eslint"
+    },
+    {
+      "description": "Group all testing library updates",
+      "matchPackagePatterns": ["jest", "@testing-library"],
+      "groupName": "testing"
+    },
+    {
+      "description": "Allow any npm registry. We use a private mirror (npm-mirror.corp-artifacts.net) and Renovate needs to resolve packages from it.",
+      "registryUrls": ["https://npm-mirror.corp-artifacts.net/repository/npm-all/"]
+    }
+  ]
+}
